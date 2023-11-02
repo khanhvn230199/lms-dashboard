@@ -26,11 +26,48 @@ func NewAuthController(DB *gorm.DB) AuthController {
 
 // SignUp User
 func (ac *AuthController) SignUpUser(ctx *gin.Context) {
-	var payload *models.SignUpInput
+	var payload models.SignUpInput
 
-	if err := ctx.ShouldBindJSON(&payload); err != nil {
+	// if err := ctx.ShouldBindJSON(&payload); err != nil {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	// 	return
+	// }
+
+	// if payload.Password != payload.PasswordConfirm {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Passwords do not match"})
+	// 	return
+	// }
+
+	// hashedPassword, err := utils.HashPassword(payload.Password)
+	// if err != nil {
+	// 	ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
+	// 	return
+	// }
+
+	if err := ctx.ShouldBind(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
+	}
+
+	if err := ctx.ShouldBindUri(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	if err := models.ValidateUser(payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	filename := ""
+	if payload.Photo != nil {
+		if err := ctx.SaveUploadedFile(payload.Photo, "uploads/"+payload.Photo.Filename); err != nil {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"message": "Unable to save the file",
+			})
+			return
+		}
+		filename = payload.Photo.Filename
 	}
 
 	if payload.Password != payload.PasswordConfirm {
@@ -45,14 +82,14 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 	}
 
 	now := time.Now()
+
 	newUser := models.User{
 		Name:      payload.Name,
 		Email:     strings.ToLower(payload.Email),
 		Password:  hashedPassword,
-		Role:      "user",
-		Verified:  true,
-		Photo:     payload.Photo,
-		Provider:  "local",
+		Role:      0,
+		Photo:     filename,
+		Type:      0,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -73,7 +110,7 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		Email:     newUser.Email,
 		Photo:     newUser.Photo,
 		Role:      newUser.Role,
-		Provider:  newUser.Provider,
+		Type:      newUser.Type,
 		CreatedAt: newUser.CreatedAt,
 		UpdatedAt: newUser.UpdatedAt,
 	}

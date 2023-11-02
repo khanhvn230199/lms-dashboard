@@ -19,4 +19,5 @@ func (uc *UserRouteController) UserRoute(rg *gin.RouterGroup) {
 
 	router := rg.Group("users")
 	router.GET("/me", middleware.DeserializeUser(), uc.userController.GetMe)
+	router.PUT("/update", middleware.DeserializeUser(), uc.userController.UpdateUserPhoto)
 }
