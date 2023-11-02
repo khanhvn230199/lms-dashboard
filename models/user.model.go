@@ -16,10 +16,10 @@ type User struct {
 	Name      string    `gorm:"uniqueIndex;not null"`
 	Email     string    `gorm:"not null"`
 	Password  string    `gorm:"not null"`
-	Role      int       `gorm:"type:varchar(255);not null"`
+	Role      int8      `gorm:"not null"`
 	Photo     string    `gorm:"not null"`
-	Type      int       `gorm:"not null"`
-	Delete    int       `gorm:"not null"`
+	Type      int8      `gorm:"not null"`
+	Delete    int8      `gorm:"not null"`
 	CreatedAt time.Time `gorm:"not null"`
 	UpdatedAt time.Time `gorm:"not null"`
 }
@@ -42,9 +42,9 @@ type UserResponse struct {
 	ID        uuid.UUID `json:"id,omitempty"`
 	Name      string    `json:"name,omitempty"`
 	Email     string    `json:"email,omitempty"`
-	Role      int       `json:"role,omitempty"`
+	Role      int8      `json:"role,omitempty"`
 	Photo     string    `json:"photo,omitempty"`
-	Type      int       `json:"provider"`
+	Type      int8      `json:"provider"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -64,6 +64,10 @@ func ValidateUser(u SignUpInput) error {
 
 	if u.Password == "" {
 		return errors.New("password invalid!")
+	}
+
+	if len(u.Password) < 8 {
+		return errors.New("password min 8 character!")
 	}
 
 	if u.PasswordConfirm == "" {

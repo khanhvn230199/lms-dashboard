@@ -90,6 +90,7 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		Role:      0,
 		Photo:     filename,
 		Type:      0,
+		Delete:    0,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -100,7 +101,7 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "User with that email already exists"})
 		return
 	} else if result.Error != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": "Something bad happened"})
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": "name already exists"})
 		return
 	}
 
