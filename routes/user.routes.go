@@ -1,17 +1,17 @@
 package routes
 
 import (
-	"kosei-jwt/controllers"
+	user_controller "kosei-jwt/controllers/user_controller"
 	"kosei-jwt/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserRouteController struct {
-	userController controllers.UserController
+	userController user_controller.UserController
 }
 
-func NewRouteUserController(userController controllers.UserController) UserRouteController {
+func NewRouteUserController(userController user_controller.UserController) UserRouteController {
 	return UserRouteController{userController}
 }
 

@@ -1,17 +1,17 @@
 package routes
 
 import (
-	"kosei-jwt/controllers"
+	auth_controller "kosei-jwt/controllers/auth_controller"
 	"kosei-jwt/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 type AuthRouteController struct {
-	authController controllers.AuthController
+	authController auth_controller.AuthController
 }
 
-func NewAuthRouteController(authController controllers.AuthController) AuthRouteController {
+func NewAuthRouteController(authController auth_controller.AuthController) AuthRouteController {
 	return AuthRouteController{authController}
 }
 

@@ -1,4 +1,4 @@
-package controllers
+package auth_controller
 
 import (
 	"fmt"
@@ -7,42 +7,15 @@ import (
 	"time"
 
 	"kosei-jwt/initializers"
-	"kosei-jwt/mail"
 	"kosei-jwt/models"
-	"kosei-jwt/otp"
 	"kosei-jwt/utils"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
-
-type AuthController struct {
-	DB *gorm.DB
-}
-
-func NewAuthController(DB *gorm.DB) AuthController {
-	return AuthController{DB}
-}
 
 // SignUp User
 func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 	var payload models.SignUpInput
-
-	// if err := ctx.ShouldBindJSON(&payload); err != nil {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
-	// 	return
-	// }
-
-	// if payload.Password != payload.PasswordConfirm {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Passwords do not match"})
-	// 	return
-	// }
-
-	// hashedPassword, err := utils.HashPassword(payload.Password)
-	// if err != nil {
-	// 	ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
-	// 	return
-	// }
 
 	if err := ctx.ShouldBind(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -94,14 +67,15 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
-
-	result := ac.DB.Create(&newUser)
-
-	if result.Error != nil && strings.Contains(result.Error.Error(), "duplicate key value violates unique") {
-		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "User with that email already exists"})
+	_, err = ac.Auth.GetUserByName(payload.Name)
+	if err == nil {
+		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "name already exists"})
 		return
-	} else if result.Error != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": "name already exists"})
+	}
+
+	err = ac.Auth.CreateUser(newUser)
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": "create user error !"})
 		return
 	}
 
@@ -116,56 +90,6 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		UpdatedAt: newUser.UpdatedAt,
 	}
 	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": gin.H{"user": userResponse}})
-}
-
-func (ac *AuthController) SignInUser(ctx *gin.Context) {
-	var payload *models.SignInInput
-
-	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
-
-	var user models.User
-	result := ac.DB.First(&user, "name = ?", payload.Name)
-	if result.Error != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid email or Password"})
-		return
-	}
-	emails := make([]string, 0)
-	emails = append(emails, user.Email)
-	otpGen, err := otp.GenerateOTP(6)
-	if err != nil {
-		return
-	}
-	go func() {
-		mail.SendMail(emails, otpGen)
-	}()
-	if err := utils.VerifyPassword(user.Password, payload.Password); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid email or Password"})
-		return
-	}
-
-	config, _ := initializers.LoadConfig(".")
-
-	// Generate Tokens
-	access_token, err := utils.CreateToken(config.AccessTokenExpiresIn, user.ID, config.AccessTokenPrivateKey)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
-
-	refresh_token, err := utils.CreateToken(config.RefreshTokenExpiresIn, user.ID, config.RefreshTokenPrivateKey)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
-
-	ctx.SetCookie("access_token", access_token, config.AccessTokenMaxAge*60, "/", "localhost", false, true)
-	ctx.SetCookie("refresh_token", refresh_token, config.RefreshTokenMaxAge*60, "/", "localhost", false, true)
-	ctx.SetCookie("logged_in", "true", config.AccessTokenMaxAge*60, "/", "localhost", false, false)
-
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": access_token, "otp": otpGen})
 }
 
 // Refresh Access Token
@@ -193,7 +117,6 @@ func (ac *AuthController) RefreshAccessToken(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user belonging to this token no logger exists"})
 		return
 	}
-
 	access_token, err := utils.CreateToken(config.AccessTokenExpiresIn, user.ID, config.AccessTokenPrivateKey)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})

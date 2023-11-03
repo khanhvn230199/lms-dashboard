@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"kosei-jwt/controllers"
+	auth_controller "kosei-jwt/controllers/auth_controller"
+	user_controller "kosei-jwt/controllers/user_controller"
 	"kosei-jwt/initializers"
 	"kosei-jwt/routes"
 
@@ -13,10 +15,10 @@ import (
 
 var (
 	server              *gin.Engine
-	AuthController      controllers.AuthController
+	AuthController      auth_controller.AuthController
 	AuthRouteController routes.AuthRouteController
 
-	UserController      controllers.UserController
+	UserController      user_controller.UserController
 	UserRouteController routes.UserRouteController
 
 	PostController      controllers.PostController
@@ -31,10 +33,10 @@ func init() {
 
 	initializers.ConnectDB(&config)
 
-	AuthController = controllers.NewAuthController(initializers.DB)
+	AuthController = auth_controller.NewAuthController(initializers.DB)
 	AuthRouteController = routes.NewAuthRouteController(AuthController)
 
-	UserController = controllers.NewUserController(initializers.DB)
+	UserController = user_controller.NewUserController(initializers.DB)
 	UserRouteController = routes.NewRouteUserController(UserController)
 
 	PostController = controllers.NewPostController(initializers.DB)
