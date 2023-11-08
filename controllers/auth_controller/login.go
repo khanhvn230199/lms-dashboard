@@ -2,7 +2,6 @@ package auth_controller
 
 import (
 	"kosei-jwt/initializers"
-	"kosei-jwt/mail"
 	"kosei-jwt/models"
 	"kosei-jwt/otp"
 	"kosei-jwt/utils"
@@ -24,15 +23,15 @@ func (ac *AuthController) SignInUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "name already exists"})
 		return
 	}
-	emails := make([]string, 0)
-	emails = append(emails, user.Email)
+	// emails := make([]string, 0)
+	// emails = append(emails, user.Email)
 	otpGen, err := otp.GenerateOTP(6)
 	if err != nil {
 		return
 	}
-	go func() {
-		mail.SendMail(emails, otpGen)
-	}()
+	// go func() {
+	// 	mail.SendMail(emails, otpGen)
+	// }()
 	if err := utils.VerifyPassword(user.Password, payload.Password); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid email or Password"})
 		return
