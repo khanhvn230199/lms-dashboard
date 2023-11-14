@@ -62,8 +62,8 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		Password:  hashedPassword,
 		Role:      0,
 		Photo:     filename,
-		Type:      0,
-		Delete:    0,
+		TypeUser:  0,
+		Deleted:   0,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -85,7 +85,7 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		Email:     newUser.Email,
 		Photo:     newUser.Photo,
 		Role:      newUser.Role,
-		Type:      newUser.Type,
+		Type:      newUser.TypeUser,
 		CreatedAt: newUser.CreatedAt,
 		UpdatedAt: newUser.UpdatedAt,
 	}

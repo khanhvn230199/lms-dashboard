@@ -18,7 +18,7 @@ func NewAuthRepository(db *gorm.DB) Authrepository {
 
 func (s *Authrepository) GetByID(id string) error {
 	var user models.User
-	result := s.DB.First(&user, "id = ?", id)
+	result := s.DB.First(&user, "id = ? and deleted = 0", id)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -36,7 +36,7 @@ func (s *Authrepository) CreateUser(user models.User) error {
 
 func (s *Authrepository) GetUserByName(name string) (models.User, error) {
 	var user models.User
-	result := s.DB.First(&user, "name = ?", name)
+	result := s.DB.First(&user, "name = ? and deleted = 0", name)
 	if result.Error != nil {
 		return user, result.Error
 	}

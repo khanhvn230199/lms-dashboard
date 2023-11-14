@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"mime/multipart"
+	"regexp"
 	"time"
 
 	"github.com/google/uuid"
@@ -10,7 +11,7 @@ import (
 
 // role == 0 || 1 : user ? admin
 
-// type == 0 || 1 : user ? teacher
+// type_user == 0 || 1 : user ? teacher
 type User struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
 	Name      string    `gorm:"uniqueIndex;not null"`
@@ -18,8 +19,8 @@ type User struct {
 	Password  string    `gorm:"not null"`
 	Role      int8      `gorm:"not null"`
 	Photo     string    `gorm:"not null"`
-	Type      int8      `gorm:"not null"`
-	Delete    int8      `gorm:"not null"`
+	TypeUser  int8      `gorm:"not null"`
+	Deleted   int8      `gorm:"index"`
 	CreatedAt time.Time `gorm:"not null"`
 	UpdatedAt time.Time `gorm:"not null"`
 }
@@ -66,6 +67,10 @@ func ValidateUser(u SignUpInput) error {
 		return errors.New("password invalid!")
 	}
 
+	if len(u.Name) < 8 || len(u.Name) > 24 {
+		return errors.New("len name invalid!")
+	}
+
 	if len(u.Password) < 8 {
 		return errors.New("password min 8 character!")
 	}
@@ -74,5 +79,14 @@ func ValidateUser(u SignUpInput) error {
 		return errors.New("name invalid!")
 	}
 
+	if !isEmailValid(u.Email) {
+		return errors.New("email invalid!")
+	}
+
 	return nil
+}
+
+func isEmailValid(e string) bool {
+	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	return emailRegex.MatchString(e)
 }
