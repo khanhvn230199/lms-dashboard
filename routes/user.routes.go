@@ -21,5 +21,8 @@ func (uc *UserRouteController) UserRoute(rg *gin.RouterGroup) {
 
 	router.DELETE("/me", middleware.DeserializeUser(), uc.userController.DeleteMe)
 	router.GET("/me", middleware.DeserializeUser(), uc.userController.GetMe)
+	router.GET("/get-user/:userID", middleware.DeserializeUser(), uc.userController.GetMeIDByUserAdmin)
+
+	router.GET("/get-all", middleware.DeserializeUser(), uc.userController.GetMeByUserAdmin)
 	router.PUT("/update", middleware.DeserializeUser(), uc.userController.UpdateUserPhoto)
 }

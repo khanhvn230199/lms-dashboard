@@ -12,17 +12,26 @@ import (
 // role == 0 || 1 : user ? admin
 
 // type_user == 0 || 1 : user ? teacher
+
+// sex == 0 || 1 : men ? girl
 type User struct {
-	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
-	Name      string    `gorm:"uniqueIndex;not null"`
-	Email     string    `gorm:"not null"`
-	Password  string    `gorm:"not null"`
-	Role      int8      `gorm:"not null"`
-	Photo     string    `gorm:"not null"`
-	TypeUser  int8      `gorm:"not null"`
-	Deleted   int8      `gorm:"index"`
-	CreatedAt time.Time `gorm:"not null"`
-	UpdatedAt time.Time `gorm:"not null"`
+	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
+	Name        string    `gorm:"uniqueIndex;not null"`
+	Email       string    `gorm:"not null"`
+	Password    string    `gorm:"not null"`
+	Role        int8      `gorm:"not null"`
+	FullName    string    `gorm:"not null"`
+	DateOfBirth string    `gorm:"not null"`
+	Phone       string    `gorm:"not null"`
+	Sex         int8      `gorm:"not null"`
+	Address     string    `gorm:"not null"`
+	City        string    `gorm:"not null"`
+	District    string    `gorm:"not null"`
+	Photo       string    `gorm:"not null"`
+	TypeUser    int8      `gorm:"not null"`
+	Deleted     int8      `gorm:"index"`
+	CreatedAt   time.Time `gorm:"not null"`
+	UpdatedAt   time.Time `gorm:"not null"`
 }
 
 type SignUpInput struct {
@@ -50,11 +59,53 @@ type UserResponse struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type SignUpInputAdmin struct {
+	Name            string                `form:"name"`
+	Email           string                `form:"email"`
+	Password        string                `form:"password"`
+	PasswordConfirm string                `form:"passwordConfirm"`
+	TypeUser        int8                  `form:"typeUser"`
+	Role            int8                  `form:"role"`
+	Photo           *multipart.FileHeader `form:"photo"`
+}
+
 type SignPhoto struct {
 	Photo *multipart.FileHeader `form:"photo"`
 }
 
 func ValidateUser(u SignUpInput) error {
+	if u.Name == "" {
+		return errors.New("name invalid!")
+	}
+
+	if u.Email == "" {
+		return errors.New("email invalid!")
+	}
+
+	if u.Password == "" {
+		return errors.New("password invalid!")
+	}
+
+	if len(u.Name) < 8 || len(u.Name) > 24 {
+		return errors.New("len name invalid!")
+	}
+
+	if len(u.Password) < 8 {
+		return errors.New("password min 8 character!")
+	}
+
+	if u.PasswordConfirm == "" {
+		return errors.New("name invalid!")
+	}
+
+	if !isEmailValid(u.Email) {
+		return errors.New("email invalid!")
+	}
+
+	return nil
+}
+
+func ValidateUserAdmin(u SignUpInputAdmin) error {
 	if u.Name == "" {
 		return errors.New("name invalid!")
 	}
