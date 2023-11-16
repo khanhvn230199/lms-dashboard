@@ -57,15 +57,21 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 	now := time.Now()
 
 	newUser := models.User{
-		Name:      payload.Name,
-		Email:     strings.ToLower(payload.Email),
-		Password:  hashedPassword,
-		Role:      0,
-		Photo:     filename,
-		TypeUser:  0,
-		Deleted:   0,
-		CreatedAt: now,
-		UpdatedAt: now,
+		Name:        payload.Name,
+		Email:       strings.ToLower(payload.Email),
+		Password:    hashedPassword,
+		Role:        0,
+		Photo:       filename,
+		Sex:         payload.Sex,
+		Address:     payload.Address,
+		FullName:    payload.FullName,
+		City:        payload.City,
+		District:    payload.District,
+		DateOfBirth: payload.DateOfBirth,
+		TypeUser:    0,
+		Deleted:     0,
+		CreatedAt:   now,
+		UpdatedAt:   now,
 	}
 	_, err = ac.Auth.GetUserByName(payload.Name)
 	if err == nil {
@@ -80,14 +86,19 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 	}
 
 	userResponse := &models.UserResponse{
-		ID:        newUser.ID,
-		Name:      newUser.Name,
-		Email:     newUser.Email,
-		Photo:     newUser.Photo,
-		Role:      newUser.Role,
-		Type:      newUser.TypeUser,
-		CreatedAt: newUser.CreatedAt,
-		UpdatedAt: newUser.UpdatedAt,
+		ID:          newUser.ID,
+		Name:        newUser.Name,
+		Email:       newUser.Email,
+		Photo:       newUser.Photo,
+		Role:        newUser.Role,
+		Type:        newUser.TypeUser,
+		DateOfBirth: newUser.DateOfBirth,
+		Address:     newUser.Address,
+		City:        newUser.City,
+		FullName:    newUser.FullName,
+		District:    newUser.District,
+		CreatedAt:   newUser.CreatedAt,
+		UpdatedAt:   newUser.UpdatedAt,
 	}
 	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": gin.H{"user": userResponse}})
 }

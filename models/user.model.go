@@ -39,6 +39,12 @@ type SignUpInput struct {
 	Email           string                `form:"email"`
 	Password        string                `form:"password"`
 	PasswordConfirm string                `form:"passwordConfirm"`
+	FullName        string                `form:"fullname"`
+	Sex             int8                  `form:"sex"`
+	Address         string                `form:"address"`
+	City            string                `form:"city"`
+	District        string                `form:"district"`
+	DateOfBirth     string                `form:"dateOfBirth"`
 	Photo           *multipart.FileHeader `form:"photo"`
 }
 
@@ -49,14 +55,20 @@ type SignInInput struct {
 }
 
 type UserResponse struct {
-	ID        uuid.UUID `json:"id,omitempty"`
-	Name      string    `json:"name,omitempty"`
-	Email     string    `json:"email,omitempty"`
-	Role      int8      `json:"role,omitempty"`
-	Photo     string    `json:"photo,omitempty"`
-	Type      int8      `json:"provider"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID          uuid.UUID `json:"id,omitempty"`
+	Name        string    `json:"name,omitempty"`
+	Email       string    `json:"email,omitempty"`
+	Role        int8      `json:"role,omitempty"`
+	Photo       string    `json:"photo,omitempty"`
+	Type        int8      `json:"provider"`
+	FullName    string    `json:"fullname"`
+	Sex         string    `json:"sex"`
+	Address     string    `json:"address"`
+	City        string    `json:"city"`
+	District    string    `json:"district"`
+	DateOfBirth string    `json:"dateOfBirth"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type SignUpInputAdmin struct {

@@ -43,3 +43,13 @@ func (s *Authrepository) GetUserByName(name string) (models.User, error) {
 
 	return user, nil
 }
+
+func (s *Authrepository) GetUserByEmail(name string) (models.User, error) {
+	var user models.User
+	result := s.DB.First(&user, "email = ? and deleted = 0", name)
+	if result.Error != nil {
+		return user, result.Error
+	}
+
+	return user, nil
+}

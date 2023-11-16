@@ -7,6 +7,7 @@ import (
 	"kosei-jwt/otp"
 	"kosei-jwt/utils"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,11 +20,23 @@ func (ac *AuthController) SignInUser(ctx *gin.Context) {
 		return
 	}
 
-	user, err := ac.Auth.GetUserByName(payload.Name)
-	if err != nil {
-		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "name already exists"})
-		return
+	var user models.User
+	if !strings.Contains(payload.Name, "@") {
+		u, err := ac.Auth.GetUserByName(payload.Name)
+		if err != nil {
+			ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "name already exists"})
+			return
+		}
+		user = u
+	} else {
+		u, err := ac.Auth.GetUserByEmail(payload.Name)
+		if err != nil {
+			ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "name already exists"})
+			return
+		}
+		user = u
 	}
+
 	emails := make([]string, 0)
 	emails = append(emails, user.Email)
 	otpGen, err := otp.GenerateOTP(6)
